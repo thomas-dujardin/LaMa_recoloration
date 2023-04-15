@@ -17,7 +17,11 @@ root = '/home/onyxia/lama_inpainting_correction_ViT'
 
 #%% Nom de l'image (contenue dans "root") à corriger
 
-imgname = 'bertrand-gabioud-CpuFzIsHYJ0.png'
+imgname = '/bertrand-gabioud-CpuFzIsHYJ0.png'
+
+#%% Nom du masque (contenu dans "root")
+
+imgmask = 'bertrand-gabioud-CpuFzIsHYJ0_mask.png'
 
 #%% Création des dossiers submasks et best_patches
 #%% submasks contient les sous-masques créés
@@ -47,7 +51,7 @@ create_folder(root + '/best_patches')
 nbre_submasks = count_elements_in_folder(root + '/submasks')
 
 #%% Chargement du masque binaire
-mask = Image.open(f"{root}/{imgname}")
+mask = Image.open(f"{root}/{maskname}")
 
 #%% Découpage du masque
 patch_size = (150,150)
