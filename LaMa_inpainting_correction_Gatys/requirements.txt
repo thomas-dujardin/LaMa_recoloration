@@ -1,0 +1,14 @@
+tensorflow==2.5.0
+numpy==1.19.5
+scikit-image==0.18.3
+tqdm==4.62.3
+transformers==4.11.3
+matplotlib==3.4.3
+tqdm
+opencv-python
+matplotlib
+pandas
+scikit-learn==0.24.2
+
+
+
