@@ -8,7 +8,16 @@ from transformers import ViTFeatureExtractor, ViTForImageClassification
 from scipy.spatial.distance import cdist
 from sklearn.metrics.pairwise import cosine_similarity
 from Rabin_peyre import transfert_couleurs
+from tqdm import tqdm
 import os
+
+#%% Dossier "root"
+
+root = '/home/onyxia/lama_inpainting_correction_ViT'
+
+#%% Nom de l'image (contenue dans "root") à corriger
+
+imgname = 'bertrand-gabioud-CpuFzIsHYJ0.png'
 
 #%% Création des dossiers submasks et best_patches
 #%% submasks contient les sous-masques créés
@@ -32,13 +41,13 @@ def count_elements_in_folder(folder_name):
         
     return num_elements
 
-create_folder('submasks')
-create_folder('best_patches')
+create_folder(root + '/submasks')
+create_folder(root + '/best_patches')
 
-nbre_submasks = count_elements_in_folder('submasks')
+nbre_submasks = count_elements_in_folder(root + '/submasks')
 
 #%% Chargement du masque binaire
-mask = Image.open("/home/onyxia/work/bertrand-gabioud-CpuFzIsHYJ0_mask.png")
+mask = Image.open(f"{root}/{imgname}")
 
 #%% Découpage du masque
 patch_size = (150,150)
@@ -55,12 +64,12 @@ for y in range(0, mask.height - patch_size[1] + 1, stride_mask):
             submask.paste(Image.new("1", (patch_size[0], patch_size[1]), 1), (x, y))
 
             #%% Création du sous-masque
-            submask.save(f"/home/onyxia/work/submasks/mask{count}.png")
+            submask.save(f"{root}/submasks/mask{count}.png")
 
             count += 1
 
 #%% Chargement de l'image
-image_path = "/home/onyxia/work/bertrand-gabioud-CpuFzIsHYJ0.png"
+image_path = root + imgname
 
 image = cv2.imread(image_path, cv2.IMREAD_COLOR).astype(np.float64)
 mask_orig = cv2.imread(mask, cv2.IMREAD_GRAYSCALE)
@@ -91,9 +100,8 @@ for i in range(patch_size[0], image.shape[0] - patch_size[0], patch_stride[0]):
 
 #%% Boucle principale : 
 
-for u in range(nbre_submasks):
-    print('iteration ' + str(u+1) + ' out of ' + str(nbre_submasks))
-    mask_path = "/home/onyxia/work/submasks/mask" + str(u) + ".png"
+for u in tqdm(range(nbre_submasks)):
+    mask_path = root + "/submasks/mask" + str(u) + ".png"
     mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
 
     _, thresh = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
@@ -126,7 +134,7 @@ for u in range(nbre_submasks):
             best_distance = distance
 
     #%% Sauvegarde du meilleur patch
-    cv2.imwrite('/home/onyxia/work/best_patches/best_patch' + str(u) + '.png', best_patch)
+    cv2.imwrite(f'{root}/best_patches/best_patch' + str(u) + '.png', best_patch)
     img_mask_copy = image[y:y+h,x:x+w,:]
 
     #%% Transfert des couleurs du patch sélectionné à la partie décolorée
@@ -140,4 +148,4 @@ for u in range(nbre_submasks):
     image = result.astype(np.uint8)
 
 #%% Sauvegarde de l'image finale
-cv2.imwrite('/home/onyxia/work/img_corrected.png', image)
+cv2.imwrite(f'{root}/img_corrected.png', image)
